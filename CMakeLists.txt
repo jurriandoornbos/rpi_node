@@ -86,22 +86,6 @@ target_link_libraries(${PROJECT_NAME}
   opencv_highgui
 )
 
-
-add_library(nodelet_stereo src/stereo_nodelet.cpp)
-
-add_dependencies(nodelet_stereo ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS} 
-  ${PROJECT_NAME}
-)
-
-target_link_libraries(nodelet_stereo
-  ${catkin_LIBRARIES}
-  depthai::core
-  ${PROJECT_NAME}
-  opencv_imgproc
-  opencv_highgui
-)
-
 # hunter_private_data(
 #     URL "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob"
 #     SHA1 "f0e14978b3f77a4f93b9f969cd39e58bb7aef490"
