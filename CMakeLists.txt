@@ -116,7 +116,8 @@ macro(dai_add_node node_name node_src)
 endmacro() 
 
 
-dai_add_node(imu_stereo_node src/imu_stereo_publisher.cpp)
+dai_add_node(imu_stereo_publisher src/imu_stereo_publisher.cpp)
+dai_add_node(imu_rgb_stereo_publisher src/imu_rgb_stereo_publisher.cpp)
 # dai_add_node(imu_node src/imu_publisher.cpp)
 
 #target_compile_definitions(mobilenet_node PRIVATE BLOB_PATH="${mobilenet_blob}")

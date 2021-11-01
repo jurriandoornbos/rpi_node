@@ -16,7 +16,7 @@
 #include "sensor_msgs/Imu.h"
 #include <depthai_bridge/ImuConverter.hpp>
 
-static constexpr int fps = 60;
+static constexpr int fps = 20;
 static constexpr int hz = 200;
 
 dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
@@ -77,7 +77,6 @@ dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
     // Link plugins IMU -> XLINK
     imuSensor->out.link(xoutImu->input);
 
-    pipeline.setXLinkChunkSize(64*8192);
     return pipeline;
 }
 
@@ -140,7 +139,7 @@ int main(int argc, char** argv){
     leftPublish.addPubisherCallback();
 
     dai::rosBridge::ImageConverter rightconverter(deviceName + "_right_camera_optical_frame", true);
-    auto rightCameraInfo = converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, 640, 400); 
+    auto rightCameraInfo = rightconverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, 640, 400); 
 
     dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rightPublish(rightQueue,
                                                                                      pnh, 
