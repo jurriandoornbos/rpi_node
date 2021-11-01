@@ -32,7 +32,7 @@
     </include>
 
     <!-- launch-prefix="xterm -e gdb (add [- - args] without space) -->
-    <node name="imu_rgb_stereo" pkg="rpi_node" type="imu_stereo_publisher" output="screen" required="true">
+    <node name="imu_stereo" pkg="rpi_node" type="imu_stereo_publisher" output="screen" required="true">
         <param name="camera_name" value="$(arg camera_name)"/>
         <param name="camera_param_uri" value="$(arg camera_param_uri)"/>
         <param name="mode" value="$(arg mode)"/>
