@@ -43,8 +43,8 @@
   <arg name="ground_truth_base_frame_id" default=""/>  <!-- e.g., "tracker", a fake frame matching the frame "frame_id" (but on different TF tree) -->
   <arg name="namespace"               default="rtabmap"/>
   <arg name="database_path"           default="~/.ros/rtabmap.db"/>
-  <arg name="queue_size"              default="500"/>
-  <arg name="wait_for_transform"      default="0.5"/>
+  <arg name="queue_size"              default="50"/>
+  <arg name="wait_for_transform"      default="0.1"/>
   <arg name="args"                    default="--delete_db_on_start"/>              <!-- delete_db_on_start, udebug -->
   <arg name="rtabmap_args"            default="$(arg args)"/>   <!-- deprecated, use "args" argument -->
   <arg name="gdb"                     default="false"/>         <!-- Launch nodes in gdb for debugging (apt install xterm gdb) -->
@@ -81,7 +81,7 @@
   <arg name="rgbd_depth_scale"        default="$(arg depth_scale)" />
   <arg name="rgbd_decimation"         default="1" />
   
-  <arg name="compressed"              default="false"/>         <!-- If you want to subscribe to compressed image topics -->
+  <arg name="compressed"              default="true"/>         <!-- If you want to subscribe to compressed image topics -->
   <arg name="rgb_image_transport"     default="compressed"/>    <!-- Common types: compressed, theora (see "rosrun image_transport list_transports") -->
   <arg name="depth_image_transport"   default="compressedDepth"/>  <!-- Depth compatible types: compressedDepth (see "rosrun image_transport list_transports") -->
   
