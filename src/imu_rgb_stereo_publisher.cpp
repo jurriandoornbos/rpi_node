@@ -28,6 +28,7 @@ dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool s
     auto stereo      = pipeline.create<dai::node::StereoDepth>();
 
 
+
     // XLinkOut
     xoutLeft->setStreamName("rectified_left");
     xoutRight->setStreamName("rectified_right");
@@ -125,6 +126,7 @@ int main(int argc, char** argv){
 
      std::string stereoUri = cameraParamUri + "/" + "right.yaml";
     */
+    std::cout << "USB SPEED: " << device.getUsbSpeed() << std::endl;
 
      
 
