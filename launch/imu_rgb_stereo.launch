@@ -41,11 +41,11 @@
         <param name="subpixel" value="$(arg subpixel)"/>
     </node>
         <!-- Launch the compressionista R + L-->
-    <node name="compressed" pkg="image_transport" type="republish" output="screen" required="true" 
-    args="raw in:=/imu_rgb_stereo/right/image compressed out:=/imu_rgb_stereo/right/compressed">
+    <node name="compressedR" pkg="image_transport" type="republish" output="screen" required="true" 
+    args="raw in:=/imu_rgb_stereo/right/image compressed out:=/right_compressed">
     </node>      
-    <node name="compressed" pkg="image_transport" type="republish" output="screen" required="true" 
-    args="raw in:=/imu_rgb_stereo/left/image compressed out:=/imu_rgb_stereo/left/compressed">
+    <node name="compressedL" pkg="image_transport" type="republish" output="screen" required="true" 
+    args="raw in:=/imu_rgb_stereo/left/image compressed out:=/left_compressed">
     </node>               
             
 
