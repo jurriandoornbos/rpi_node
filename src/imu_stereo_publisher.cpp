@@ -1,4 +1,3 @@
-
 #include "ros/ros.h"
 
 #include <iostream>
@@ -13,13 +12,13 @@
 #include <depthai_bridge/BridgePublisher.hpp>
 #include <depthai_bridge/ImageConverter.hpp>
 #include <depthai_bridge/DisparityConverter.hpp>
-#include "sensor_msgs/Imu.h"
+
 #include <depthai_bridge/ImuConverter.hpp>
 
-static constexpr int fps = 20;
+static constexpr int fps = 60;
 static constexpr int hz = 200;
 
-dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
+dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool subpixel){
     dai::Pipeline pipeline;
 
     auto monoLeft    = pipeline.create<dai::node::MonoCamera>();
@@ -28,7 +27,23 @@ dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
     auto xoutRight   = pipeline.create<dai::node::XLinkOut>();
     auto stereo      = pipeline.create<dai::node::StereoDepth>();
 
-    // XLinkOut
+
+    auto camRgb = pipeline.create<dai::node::ColorCamera>();
+    auto xoutRGB = pipeline.create<dai::node::XLinkOut>();
+
+    xoutRGB->setStreamName("rgb");
+
+    // Properties
+    camRgb->setPreviewSize(640, 400);
+    camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
+    camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
+    camRgb->setInterleaved(false);
+    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
+    camRgb->preview.link(xoutRGB->input);
+
+
+
+    // XLinkOut Stereo
     xoutLeft->setStreamName("rectified_left");
     xoutRight->setStreamName("rectified_right");
 
@@ -45,9 +60,9 @@ dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
     // if (subpixel) maxDisp *= 32; // 5 bits fractional disparity
 
     // StereoDepth
-    // stereo->initialConfig.setConfidenceThreshold(200);
-    // stereo->setRectifyEdgeFillColor(0); // black, to better see the cutout
-    // stereo->initialConfig.setLeftRightCheckThreshold(1);
+    //stereo->initialConfig.setConfidenceThreshold(250);
+    //stereo->setRectifyEdgeFillColor(0); // black, to better see the cutout
+    //stereo->initialConfig.setLeftRightCheckThreshold(1);
     stereo->setLeftRightCheck(lrcheck);
     stereo->setExtendedDisparity(extended);
     stereo->setSubpixel(subpixel);
@@ -59,7 +74,8 @@ dai::Pipeline createPipeline(bool lrcheck, bool extended, bool subpixel){
     stereo->rectifiedLeft.link(xoutLeft->input);
     stereo->rectifiedRight.link(xoutRight->input);
 
-    // Add IMU To the pipeline
+
+        // Add IMU To the pipeline
 
     auto imuSensor = pipeline.create<dai::node::IMU>();
     auto xoutImu = pipeline.create<dai::node::XLinkOut>();
@@ -88,7 +104,7 @@ int main(int argc, char** argv){
     std::string deviceName, mode;
     std::string cameraParamUri;
     int badParams = 0;
-    bool lrcheck, extended, subpixel;
+    bool lrcheck, extended, subpixel, enableDepth;
 
     badParams += !pnh.getParam("camera_name", deviceName);
     badParams += !pnh.getParam("camera_param_uri", cameraParamUri);
@@ -104,12 +120,14 @@ int main(int argc, char** argv){
         throw std::runtime_error("Couldn't find %d of the parameters");
     }
 
-    dai::Pipeline pipeline = createPipeline(lrcheck, extended, subpixel);
-    
+
+    dai::Pipeline pipeline = createPipeline(enableDepth, lrcheck, extended, subpixel);
+
     dai::Device device(pipeline);
 
-    auto leftQueue = device.getOutputQueue("rectified_left", fps, false);
-    auto rightQueue = device.getOutputQueue("rectified_right", fps, false);
+    auto leftQueue = device.getOutputQueue("rectified_left", 30, false);
+    auto rightQueue = device.getOutputQueue("rectified_right", 30, false);
+    auto rgbQueue = device.getOutputQueue("rgb", 30, false);
 
     auto imuQueue = device.getOutputQueue("imu", hz, false);
 
@@ -122,7 +140,11 @@ int main(int argc, char** argv){
      std::string rightUri = cameraParamUri + "/" + "right.yaml";
 
      std::string stereoUri = cameraParamUri + "/" + "right.yaml";
-    */        
+    */
+    std::cout << "USB SPEED: " << device.getUsbSpeed() << std::endl;
+
+     
+
     dai::rosBridge::ImageConverter converter(deviceName + "_left_camera_optical_frame", true);
     auto leftCameraInfo = converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::LEFT, 640, 400); 
     dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> leftPublish(leftQueue,
@@ -132,14 +154,14 @@ int main(int argc, char** argv){
                                                                                     &converter, 
                                                                                     std::placeholders::_1, 
                                                                                     std::placeholders::_2) , 
-                                                                                    fps,
+                                                                                    30,
                                                                                     leftCameraInfo,
                                                                                     "left");
 
     leftPublish.addPubisherCallback();
 
     dai::rosBridge::ImageConverter rightconverter(deviceName + "_right_camera_optical_frame", true);
-    auto rightCameraInfo = rightconverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, 640, 400); 
+    auto rightCameraInfo = converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RIGHT, 640, 400); 
 
     dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rightPublish(rightQueue,
                                                                                      pnh, 
@@ -148,11 +170,24 @@ int main(int argc, char** argv){
                                                                                      &rightconverter, 
                                                                                      std::placeholders::_1, 
                                                                                      std::placeholders::_2) , 
-                                                                                     fps,
+                                                                                     30,
                                                                                      rightCameraInfo,
                                                                                      "right");
 
     rightPublish.addPubisherCallback();
+
+    auto rgbCameraInfo = rightconverter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::RGB, 640, 400); 
+    dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> rgbPublish(rgbQueue,
+                                                                                    pnh, 
+                                                                                    std::string("color/image"),
+                                                                                    std::bind(&dai::rosBridge::ImageConverter::toRosMsg, 
+                                                                                    &converter, 
+                                                                                    std::placeholders::_1, 
+                                                                                    std::placeholders::_2) , 
+                                                                                    30,
+                                                                                    rgbCameraInfo,
+                                                                                    "color");
+    rgbPublish.addPubisherCallback();
 
     dai::rosBridge::ImuConverter imuConverter(deviceName + "_imu_frame");
     dai::rosBridge::BridgePublisher<sensor_msgs::Imu, dai::IMUData> imuPublish(imuQueue,
@@ -168,7 +203,8 @@ int main(int argc, char** argv){
                                                                                     rightCameraInfo,
                                                                                     "imu");
 
-    imuPublish.addPubisherCallback();
+    imuPublish.addPubisherCallback();  
+
     ros::spin();
     
 

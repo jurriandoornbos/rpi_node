@@ -17,7 +17,7 @@
   <arg name="stereo"                    default="true"/>
   <arg     if="$(arg stereo)" name="depth"  default="false"/>
   <arg unless="$(arg stereo)" name="depth"  default="true"/>
-  <arg name="subscribe_rgb"  default="true"/>
+  <arg name="subscribe_rgb"  default="false"/>
  
   <!-- Choose visualization -->
   <arg name="rtabmapviz"              default="true" /> 
@@ -54,7 +54,7 @@
   <arg name="output"                  default="screen"/>        <!-- Control node output (screen or log) -->
   <arg name="publish_tf_map"          default="true"/>
 
-  <!-- if timestamps of the input topics are synchronized using approximate or exact time policy-->
+  <!-- if timestamps of the input topics are synchronized using approximate or exact time policysd-->
   <arg     if="$(arg stereo)" name="approx_sync"  default="true"/>
   <arg unless="$(arg stereo)" name="approx_sync"  default="$(arg depth)"/>         
    
@@ -113,7 +113,7 @@
   <arg name="odom_tf_angular_variance" default="0.001"/>         <!-- If TF is used to get odometry, this is the default angular variance -->
   <arg name="odom_tf_linear_variance"  default="0.001"/>         <!-- If TF is used to get odometry, this is the default linear variance -->
   <arg name="odom_args"                default=""/>              <!-- More arguments for odometry (overwrite same parameters in rtabmap_args) -->
-  <arg name="odom_sensor_sync"         default="false"/>
+  <arg name="odom_sensor_sync"         default="true"/>
 
   <arg name="odom_guess_frame_id"        default=""/>
   <arg name="odom_guess_min_translation" default="0"/>
@@ -133,7 +133,7 @@
   <arg name="scan_cloud_assembling_range_max"    default="0.0"/>    <!-- 0=disabled -->
   <arg name="scan_cloud_assembling_noise_radius"   default="0.0"/>    <!-- 0=disabled -->
   <arg name="scan_cloud_assembling_noise_min_neighbors"   default="5"/>
-  
+    
   <arg name="subscribe_user_data"      default="false"/>             <!-- user data synchronized subscription -->
   <arg name="user_data_topic"          default="/user_data"/>
   <arg name="user_data_async_topic"    default="/user_data_async" /> <!-- user data async subscription (rate should be lower than map update rate) -->
@@ -226,7 +226,7 @@
       <group if="$(arg visual_odometry)">
       
         <!-- Stereo Odometry -->
-        <node if="$(arg stereo)" pkg="rtabmap_ros" type="stereo_odometry" name="stereo_odometry" clear_params="$(arg clear_params)" output="$(arg output)" args="$(arg rtabmap_args) $(arg odom_args)" launch-prefix="$(arg launch_prefix)">
+        <node if="$(arg stereo)" pkg="rtabmap_ros" type="stereo_odometry" name="stereo_odometry" clear_params="$(arg clear_params)" output="log" args="$(arg rtabmap_args) $(arg odom_args)" launch-prefix="$(arg launch_prefix)">
           <remap from="left/image_rect"        to="$(arg left_image_topic_relay)"/>
           <remap from="right/image_rect"       to="$(arg right_image_topic_relay)"/>
           <remap from="left/camera_info"       to="$(arg left_camera_info_topic)"/>
@@ -254,16 +254,26 @@
           <param name="keep_color"                  type="bool"   value="$(arg use_odom_features)"/>
 
                     <!-- 0=Frame-to-Map (F2M) 1=Frame-to-Frame (F2F) -->
-          <param name="Odom/Strategy" value="0"/>
+          <param name="Odom/Strategy" value="5"/>
           <!-- Correspondences: 0=Features Matching, 1=Optical Flow -->
           <param name="Vis/CorType" value="0"/>
-          <!-- maximum features map size, default 2000 -->
-          <param name="OdomF2M/MaxSize" type="string" value="1000"/> 
+          <param name="Vis/MinInliers" value="10"/>
+
           <!-- maximum features extracted by image, default 1000 -->
-          <param name="Vis/MaxFeatures" type="string" value="500"/>
+          <param name="Vis/MaxFeatures" type="string" value="20"/>
           <param name="GFTT/MinDistance" type="string" value="10"/> <!-- default 5 pixels -->
           <!-- <param name="Odom/ResetCountdown"              value="1" /> -->
           <param name="Reg/Force3DoF"    value="false" />
+          <param name= "OdomORBSLAM/Bf"   value= "64.42822268" />
+          <param name= "OdomORBSLAM/Fps"  value = "60.0"  />
+          <param name= "OdomORBSLAM/MapSize"  value= "2000"/>
+          <param name= "OdomORBSLAM/MaxFeatures" value = "2000"/>
+          <param name= "OdomORBSLAM/ThDepth" value = "35.0" />    
+          <param name= "OdomORBSLAM/VocPath" value= "/home/jurrian/dev/ORB_SLAM3/Vocabulary/ORBvoc.txt"/>
+          <param name = "Optimizer/Robust"   value= "true"/>
+          <param name ="PyMatcher/Model" value = "outdoor"/>
+          <param name = "RGBD/LoopClosureReextractFeatures" value = "true"/>
+
         </node>
       </group>
     </group>
@@ -314,6 +324,10 @@
       <param name="Grid/MaxGroundHeight" value="0.1"/>
       <param name="Grid/MaxHeight" value="2.0"/>
       <param name="Grid/MinClusterSize" value="20"/>
+      <param name= "Grid/RayTracing"  value = "true"/> 
+      <param name ="PyMatcher/Model" value = "outdoor"/>
+      <param name = "RGBD/LoopClosureReextractFeatures" value = "true"/>
+      <param name = "Stereo/MaxDisparity" value = "240"/>
       
       <remap from="rgb/image"       to="$(arg rgb_topic_relay)"/>
       <remap from="depth/image"     to="$(arg depth_topic_relay)"/>
