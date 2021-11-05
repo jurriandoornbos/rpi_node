@@ -27,7 +27,6 @@ dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool s
     auto xoutRight   = pipeline.create<dai::node::XLinkOut>();
     auto stereo      = pipeline.create<dai::node::StereoDepth>();
 
-
     auto camRgb = pipeline.create<dai::node::ColorCamera>();
     auto xoutRGB = pipeline.create<dai::node::XLinkOut>();
 
@@ -143,8 +142,6 @@ int main(int argc, char** argv){
     */
     std::cout << "USB SPEED: " << device.getUsbSpeed() << std::endl;
 
-     
-
     dai::rosBridge::ImageConverter converter(deviceName + "_left_camera_optical_frame", true);
     auto leftCameraInfo = converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::LEFT, 640, 400); 
     dai::rosBridge::BridgePublisher<sensor_msgs::Image, dai::ImgFrame> leftPublish(leftQueue,
@@ -211,6 +208,6 @@ int main(int argc, char** argv){
     // We can add the rectified frames also similar to these publishers. 
     // Left them out so that users can play with it by adding and removing
 
-    
+  
     return 0;
 }

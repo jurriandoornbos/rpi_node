@@ -259,6 +259,8 @@
           <param name="Vis/CorType" value="0"/>
           <param name="Vis/MinInliers" value="10"/>
 
+          
+
           <!-- maximum features extracted by image, default 1000 -->
           <param name="Vis/MaxFeatures" type="string" value="20"/>
           <param name="GFTT/MinDistance" type="string" value="10"/> <!-- default 5 pixels -->
