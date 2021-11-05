@@ -4,6 +4,8 @@ Made for a Raspberry Pi 4, Ubuntu 20.04 and ROS Noetic
 The camera is connected to the RPi via the USB3 cable, and only requires ROS Noetic + the camera driver to be installed. (Depthai-ROS)
 The base-station laptop requires everything to run, for usefulness sake in debugging, Depthai-ROS is also installed in the ros_ws.
 
+It has an altered version of the example nodes from Luxonis/Depthai-ROS, and a set of launch files for rtabmap settings and camera.
+
 
 ## Install prerequisites:
 ### Depthai-ROS:
@@ -28,7 +30,7 @@ use sudo make install for Pangolin instead of cmake --build . as it causes an er
 
 Notes taken from GitHub issue about ORB_SLAM and RTAB-Map:
 ```
-export ORB_SLAM_ROOT_DIR=/home/...../src/ORB_SLAM3
+export ORB_SLAM_ROOT_DIR=/DEV_DIRECTORY/ORB_SLAM3
 git clone https://github.com/introlab/rtabmap.git rtabmap
 cd rtabmap/build
 make .. -DWITH_G2O=OFF -DWITH_Qt=OFF
@@ -49,5 +51,18 @@ cd ..
 catkin build
 ```
 
+## Usage:
+On the RPi:
+- Set the ROS_MASTER_URI=http://basestation.ip:11311
+- set the ROS_HOSTNAME (if set on the router): devicename
+- otherwise: set the ROS_IP: rpi_ip
 
+Run the imu_rgb_stereo.launch file on the Raspberry:
+```
+roslaunch rpi_node imu_rgb_stereo.launch
+```
 
+Run the slam algorithm on the base-station laptop:
+```
+roslaunch rpi_node stereo_slam.launch
+```
