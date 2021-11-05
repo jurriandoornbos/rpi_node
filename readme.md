@@ -52,15 +52,23 @@ catkin build
 ```
 
 ## Usage:
-On the RPi:
-- Set the ROS_MASTER_URI=http://basestation.ip:11311
-- set the ROS_HOSTNAME (if set on the router): devicename
-- otherwise: set the ROS_IP: rpi_ip
+Network setup on the RPi:
+basestation name could either be a host-domain or an ip adress
+
+- Set the ROS_MASTER_URI=http://basestation_name:11311 (or ip address) `export ROS_MASTER_URI=http://basestation_name:11311 `
+- set the ROS_HOSTNAME (if set on the router): devicename `export ROS_HOSTNAME=rpi_name`
+- otherwise: set the ROS_IP: rpi_ip `export ROS_IP=rpi_ip`
 
 Run the imu_rgb_stereo.launch file on the Raspberry:
 ```
 roslaunch rpi_node imu_rgb_stereo.launch
 ```
+
+Network setup on the Base station (laptop in my case.)
+
+- Set the ROS_MASTER_URI:http://basestation_name:11311 `export ROS_MASTER_URI=http://basestation_name:11311`
+- set the ROS_HOSTNAME (if set on the router): basestation `export ROS_HOSTNAME=basestation_name`
+- otherwise: set the ROS_IP: basestation.ip `export ROS_IP=basestation_name.ip`
 
 Run the slam algorithm on the base-station laptop:
 ```
