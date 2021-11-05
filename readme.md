@@ -27,25 +27,27 @@ use sudo make install for Pangolin instead of cmake --build . as it causes an er
 ### RTABMAP from source:
 
 Notes taken from GitHub issue about ORB_SLAM and RTAB-Map:
-- export ORB_SLAM_ROOT_DIR=/home/...../src/ORB_SLAM3
-- git clone https://github.com/introlab/rtabmap.git rtabmap
-- cd rtabmap/build
-- cmake .. -DWITH_G2O=OFF -DWITH_Qt=OFF
-- make
-- sudo make install
-
-- cd ~/noetic_ws
-- git clone https://github.com/introlab/rtabmap_ros.git src/rtabmap_ros
-
+```
+export ORB_SLAM_ROOT_DIR=/home/...../src/ORB_SLAM3
+git clone https://github.com/introlab/rtabmap.git rtabmap
+cd rtabmap/build
+make .. -DWITH_G2O=OFF -DWITH_Qt=OFF
+make
+sudo make install
+```
+```
+cd ~/noetic_ws
+git clone https://github.com/introlab/rtabmap_ros.git src/rtabmap_ros
+```
 
 ### rpi_node
 add to the ros_ws/src folder:
-
+```
 cd ~/noetic_ws/src
 git clone https://github.com/jurriandoornbos/rpi_node.git
 cd ..
 catkin build
-
+```
 
 
 
