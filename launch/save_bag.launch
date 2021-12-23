@@ -1,0 +1,23 @@
+ <launch>
+
+    <node pkg="rosbag" type="record" name="rosbag_record_cam"
+        args="record -o /home/jurrian/rosbags/november23 
+        /imu_rgb_stereo/color/image/compressed 
+        /imu_rgb_stereo/imu 
+        /imu_rgb_stereo/stereo/right/compressed 
+        /imu_rgb_stereo/stereo/left/compressed
+        /imu_rgb_stereo/color/camera_info
+        /imu_rgb_stereo/stereo/camera_info
+        /rtabmap/rtapmap/odom
+        /rtabmap/proj_map
+        /rtabmap/mapData
+        /rtabmap/scan_map
+        /tf_static
+        /rtabmap/global_path
+        /rtabmap/cloud_map
+        /rtabmap/localization_pose
+        
+        "/>
+
+
+</launch>

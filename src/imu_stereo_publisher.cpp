@@ -6,19 +6,21 @@
 #include "stereo_msgs/DisparityImage.h"
 #include <camera_info_manager/camera_info_manager.h>
 #include <functional>
+#include <vision_msgs/Detection2DArray.h>
 
 // Inludes common necessary includes for development using depthai library
 #include "depthai/depthai.hpp"
 #include <depthai_bridge/BridgePublisher.hpp>
 #include <depthai_bridge/ImageConverter.hpp>
 #include <depthai_bridge/DisparityConverter.hpp>
+#include <depthai_bridge/ImgDetectionConverter.hpp>
 
 #include <depthai_bridge/ImuConverter.hpp>
 
 static constexpr int fps = 60;
 static constexpr int hz = 200;
 
-dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool subpixel){
+dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool subpixel, std::string nnPath) {
     dai::Pipeline pipeline;
 
     auto monoLeft    = pipeline.create<dai::node::MonoCamera>();
@@ -33,12 +35,12 @@ dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool s
     xoutRGB->setStreamName("rgb");
 
     // Properties
-    camRgb->setPreviewSize(640, 400);
+    camRgb->setPreviewSize(300, 300);
     camRgb->setBoardSocket(dai::CameraBoardSocket::RGB);
     camRgb->setResolution(dai::ColorCameraProperties::SensorResolution::THE_1080_P);
     camRgb->setInterleaved(false);
-    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::RGB);
-    camRgb->preview.link(xoutRGB->input);
+    camRgb->setColorOrder(dai::ColorCameraProperties::ColorOrder::BGR);
+    
 
 
 
@@ -92,6 +94,21 @@ dai::Pipeline createPipeline(bool withDepth, bool lrcheck, bool extended, bool s
     // Link plugins IMU -> XLINK
     imuSensor->out.link(xoutImu->input);
 
+    // add mobilenet to the pipeline
+    //auto detectionNetwork = pipeline.create<dai::node::MobileNetDetectionNetwork>();
+    //auto nnOut = pipeline.create<dai::node::XLinkOut>();
+
+    //nnOut->setStreamName("detections");
+
+    //detectionNetwork->setConfidenceThreshold(0.5f);
+    //detectionNetwork->setBlobPath(nnPath);
+
+    //camRgb->preview.link(detectionNetwork->input);
+
+    //detectionNetwork->passthrough.link(xoutRGB->input);
+    
+    //detectionNetwork->out.link(nnOut->input);
+
     return pipeline;
 }
 
@@ -102,6 +119,7 @@ int main(int argc, char** argv){
     
     std::string deviceName, mode;
     std::string cameraParamUri;
+    std::string nnPath(BLOB_PATH);
     int badParams = 0;
     bool lrcheck, extended, subpixel, enableDepth;
 
@@ -120,13 +138,16 @@ int main(int argc, char** argv){
     }
 
 
-    dai::Pipeline pipeline = createPipeline(enableDepth, lrcheck, extended, subpixel);
+    dai::Pipeline pipeline = createPipeline(enableDepth, lrcheck, extended, subpixel,nnPath);
 
     dai::Device device(pipeline);
 
     auto leftQueue = device.getOutputQueue("rectified_left", 30, false);
     auto rightQueue = device.getOutputQueue("rectified_right", 30, false);
     auto rgbQueue = device.getOutputQueue("rgb", 30, false);
+    
+    //auto nNetDataQueue = device.getOutputQueue("detections", 30, false);
+
 
     auto imuQueue = device.getOutputQueue("imu", hz, false);
 
@@ -141,6 +162,20 @@ int main(int argc, char** argv){
      std::string stereoUri = cameraParamUri + "/" + "right.yaml";
     */
     std::cout << "USB SPEED: " << device.getUsbSpeed() << std::endl;
+
+    //dai::rosBridge::ImgDetectionConverter detConverter(deviceName + "_rgb_camera_optical_frame", 300, 300, false);
+    //dai::rosBridge::BridgePublisher<vision_msgs::Detection2DArray, dai::ImgDetections> detectionPublish(nNetDataQueue,
+    //                                                                                                     pnh, 
+    //                                                                                                   std::string("color/mobilenet_detections"),
+    //                                                                                                     std::bind(static_cast<void(dai::rosBridge::ImgDetectionConverter::*)(std::shared_ptr<dai::ImgDetections>, 
+    //                                                                                                     vision_msgs::Detection2DArray&)>(&dai::rosBridge::ImgDetectionConverter::toRosMsg), 
+    //                                                                                                     &detConverter,
+    //                                                                                                     std::placeholders::_1, 
+    //                                                                                                     std::placeholders::_2), 
+    //                                                                                                     30);
+    //
+    //detectionPublish.startPublisherThread();
+
 
     dai::rosBridge::ImageConverter converter(deviceName + "_left_camera_optical_frame", true);
     auto leftCameraInfo = converter.calibrationToCameraInfo(calibrationHandler, dai::CameraBoardSocket::LEFT, 640, 400); 

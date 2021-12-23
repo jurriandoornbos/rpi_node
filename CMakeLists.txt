@@ -93,6 +93,12 @@ target_link_libraries(${PROJECT_NAME}
 #     LOCATION mobilenet_blob
 # )
 
+set(mobilenet_blob "${PROJECT_SOURCE_DIR}/resources/mobilenet-ssd_openvino_2021.2_6shave.blob")
+file(DOWNLOAD "https://artifacts.luxonis.com/artifactory/luxonis-depthai-data-local/network/mobilenet-ssd_openvino_2021.2_6shave.blob" 
+${mobilenet_blob}
+TIMEOUT 60  # seconds
+EXPECTED_HASH SHA1=f0e14978b3f77a4f93b9f969cd39e58bb7aef490
+TLS_VERIFY ON)
 
 
 
@@ -120,5 +126,5 @@ dai_add_node(imu_stereo_publisher src/imu_stereo_publisher.cpp)
 dai_add_node(imu_rgb_stereo_publisher src/imu_rgb_stereo_publisher.cpp)
 # dai_add_node(imu_node src/imu_publisher.cpp)
 
-#target_compile_definitions(mobilenet_node PRIVATE BLOB_PATH="${mobilenet_blob}")
+target_compile_definitions(imu_stereo_publisher PRIVATE BLOB_PATH="${mobilenet_blob}")
 # target_compile_definitions(yolov4_spatial_node PRIVATE BLOB_PATH="${tiny_yolo_v4_blob}")
