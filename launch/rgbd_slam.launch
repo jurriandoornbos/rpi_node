@@ -60,9 +60,9 @@
   <arg unless="$(arg stereo)" name="approx_sync"  default="$(arg depth)"/>         
    
   <!-- RGB-D related topics -->
-  <arg name="rgb_topic"               default="/imu_rgbd/color/image" />
-  <arg name="depth_topic"             default="/imu_rgbd/stereo/depth" />
-  <arg name="camera_info_topic"       default="/imu_rgbd/color/camera_info" />
+  <arg name="rgb_topic"               default="/imu_rgb_stereo/color/image" />
+  <arg name="depth_topic"             default="/imu_rgb_stereo/stereo/depth" />
+  <arg name="camera_info_topic"       default="/imu_rgb_stereo/color/camera_info" />
   <arg name="depth_camera_info_topic" default="$(arg camera_info_topic)" />
   
   <!-- stereo related topics -->
@@ -73,7 +73,7 @@
   <arg name="right_camera_info_topic" default="$(arg stereo_namespace)/right/camera_info" />
   
   <!-- Already synchronized RGB-D related topic, with rtabmap_ros/rgbd_sync nodelet -->
-  <arg name="rgbd_sync"               default="false"/>         <!-- pre-sync rgb_topic, depth_topic, camera_info_topic -->
+  <arg name="rgbd_sync"               default="true"/>         <!-- pre-sync rgb_topic, depth_topic, camera_info_topic -->
   <arg name="approx_rgbd_sync"        default="true"/>          <!-- false=exact synchronization -->
   <arg name="subscribe_rgbd"          default="$(arg rgbd_sync)"/>
   <arg name="rgbd_topic"              default="rgbd_image" />
@@ -81,9 +81,9 @@
   <arg name="rgbd_depth_scale"        default="$(arg depth_scale)" />
   <arg name="rgbd_decimation"         default="1" />
   
-  <arg name="compressed"              default="false"/>         <!-- If you want to subscribe to compressed image topics -->
+  <arg name="compressed"              default="true"/>         <!-- If you want to subscribe to compressed image topics -->
   <arg name="rgb_image_transport"     default="compressed"/>    <!-- Common types: compressed, theora (see "rosrun image_transport list_transports") -->
-  <arg name="depth_image_transport"   default="compressedDepth"/>  <!-- Depth compatible types: compressedDepth (see "rosrun image_transport list_transports") -->
+  <arg name="depth_image_transport"   default="compressed"/>  <!-- Depth compatible types: compressedDepth (see "rosrun image_transport list_transports") -->
   
   <arg name="gen_cloud"               default="false"/> <!-- only works with depth image and if not subscribing to scan_cloud topic-->
   <arg name="gen_cloud_decimation"    default="4"/>
@@ -119,7 +119,7 @@
   <arg name="odom_guess_min_rotation"    default="0"/>
   <arg name="odom_max_rate"            default="0"/>
   <arg name="odom_expected_rate"       default="0"/>
-  <arg name="imu_topic"                default="/imu/data"/>          <!-- only used with VIO approaches -->
+  <arg name="imu_topic"                default="/imu_rgb_stereo/imu"/>          <!-- only used with VIO approaches -->
   <arg name="wait_imu_to_init"         default="false"/>
   <arg name="use_odom_features"        default="false"/>
   
